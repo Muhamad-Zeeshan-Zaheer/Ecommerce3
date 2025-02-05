@@ -1,0 +1,36 @@
+<div class="text-end me-2 mt-3 mb-3">
+  <%= link_to "New Item", new_item_path, class: "btn btn-success" %>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Image</th>
+      <th scope="col">Name</th>
+      <th scope="col">Price</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @items.each do |item| %>
+      <tr>
+        <td>
+          <% if item.image.attached? %>
+            <%= image_tag url_for(item.image), height: "50px", width: "50px" %>
+          <% else %>
+            No image
+          <% end %>
+        </td>
+        <td><%= item.name %></td>
+        <td><%= item.price %></td>
+        <td>
+          <%= link_to "Edit Item", edit_item_path(item), class: "btn btn-warning" %>
+          <%= link_to "Delete Item", item_path(item), data: {
+                turbo_method: :delete,
+                turbo_confirm: "Are you sure?"
+              }, class: "btn btn-danger" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
