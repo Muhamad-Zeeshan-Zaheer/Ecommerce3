@@ -1,97 +1,38 @@
 document.addEventListener("DOMContentLoaded", function() {
   const cartItemsBody = document.getElementById('cart-items-body');
   const totalPriceSpan = document.getElementById('total-price');
+  const placeOrderButton = document.getElementById('place-order-button');
 
-  console.log("Cart.js is loaded"); // Debugging statement
-
-  // Load cart items from localStorage
   loadCart();
 
-  // Event listener for adding items to the cart
+  // Listen for clicks on 'Add to Cart' buttons directly
   document.querySelectorAll('.add-to-cart').forEach(button => {
     button.addEventListener('click', function(event) {
+      event.preventDefault(); // Prevent link from causing page reload
       const itemId = event.target.dataset.itemId;
       const itemName = event.target.dataset.itemName;
       const itemPrice = parseFloat(event.target.dataset.itemPrice);
-
-      console.log(`Adding item: ${itemId}, ${itemName}, ${itemPrice}`); // Debugging statement
-
-      // Add item to localStorage (if it's not already in the cart)
       addItemToCart(itemId, itemName, itemPrice);
     });
   });
 
-  // Event listener for increasing or decreasing the quantity of an item
-  cartItemsBody.addEventListener('click', function(event) {
-    if (event.target.classList.contains('increase-quantity') || event.target.classList.contains('decrease-quantity')) {
-      const itemId = event.target.dataset.itemId;
-      console.log(`Updating quantity for item: ${itemId}`); // Debugging statement
-      updateItemQuantity(itemId, event.target.classList.contains('increase-quantity'));
-    }
-
-    if (event.target.classList.contains('remove-from-cart')) {
-      const itemId = event.target.dataset.itemId;
-      console.log(`Removing item: ${itemId}`); // Debugging statement
-      removeItemFromCart(itemId);
-    }
-  });
-
-  // Function to add an item to the cart
+  // Add Item to Cart
   function addItemToCart(itemId, itemName, itemPrice) {
     let cart = JSON.parse(localStorage.getItem('cart')) || {};
     if (cart[itemId]) {
-      // Item already in the cart, increase quantity
       cart[itemId].quantity += 1;
     } else {
-      // New item, add it to the cart
       cart[itemId] = { id: itemId, name: itemName, price: itemPrice, quantity: 1 };
     }
 
-    console.log("Cart after addition:", cart); // Debugging statement
-
-    // Save updated cart to localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
-
-    // Re-render cart
     loadCart();
   }
 
-  // Function to remove an item from the cart
-  function removeItemFromCart(itemId) {
-    let cart = JSON.parse(localStorage.getItem('cart')) || {};
-    delete cart[itemId];
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    // Re-render cart
-    loadCart();
-  }
-
-  // Function to update item quantity in the cart
-  function updateItemQuantity(itemId, increase = true) {
-    let cart = JSON.parse(localStorage.getItem('cart')) || {};
-    if (cart[itemId]) {
-      if (increase) {
-        cart[itemId].quantity += 1;
-      } else {
-        cart[itemId].quantity = Math.max(1, cart[itemId].quantity - 1);
-      }
-
-      console.log("Cart after quantity update:", cart); // Debugging statement
-
-      // Save updated cart to localStorage
-      localStorage.setItem('cart', JSON.stringify(cart));
-
-      // Re-render cart
-      loadCart();
-    }
-  }
-
-  // Function to load cart items from localStorage and render them
+  // Load Cart and Update Cart View
   function loadCart() {
     const cart = JSON.parse(localStorage.getItem('cart')) || {};
-    cartItemsBody.innerHTML = ''; // Clear existing items
-
-    console.log("Cart loaded:", cart); // Debugging statement
+    cartItemsBody.innerHTML = '';
 
     Object.values(cart).forEach(item => {
       const cartItemRow = document.createElement('tr');
@@ -111,15 +52,57 @@ document.addEventListener("DOMContentLoaded", function() {
           <button class="btn btn-danger remove-from-cart" data-item-id="${item.id}">Remove</button>
         </td>
       `;
-
       cartItemsBody.appendChild(cartItemRow);
     });
 
-    // Update total price
+    // Attach event listeners for quantity buttons
+    document.querySelectorAll('.increase-quantity').forEach(button => {
+      button.addEventListener('click', function(event) {
+        const itemId = event.target.dataset.itemId;
+        updateItemQuantity(itemId, 1);
+      });
+    });
+
+    document.querySelectorAll('.decrease-quantity').forEach(button => {
+      button.addEventListener('click', function(event) {
+        const itemId = event.target.dataset.itemId;
+        updateItemQuantity(itemId, -1);
+      });
+    });
+
+    // Attach event listeners for remove buttons
+    document.querySelectorAll('.remove-from-cart').forEach(button => {
+      button.addEventListener('click', function(event) {
+        const itemId = event.target.dataset.itemId;
+        removeItemFromCart(itemId);
+      });
+    });
+
     updateTotalPrice();
   }
 
-  // Function to update the total price of the cart
+  // Update Item Quantity
+  function updateItemQuantity(itemId, change) {
+    let cart = JSON.parse(localStorage.getItem('cart')) || {};
+    if (cart[itemId]) {
+      cart[itemId].quantity += change;
+      if (cart[itemId].quantity <= 0) {
+        delete cart[itemId]; // Remove item if quantity is 0 or less
+      }
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    loadCart();
+  }
+
+  // Remove Item from Cart
+  function removeItemFromCart(itemId) {
+    let cart = JSON.parse(localStorage.getItem('cart')) || {};
+    delete cart[itemId];
+    localStorage.setItem('cart', JSON.stringify(cart));
+    loadCart();
+  }
+
+  // Update Total Price
   function updateTotalPrice() {
     let total = 0;
     document.querySelectorAll('.item-total').forEach(itemTotal => {
@@ -127,4 +110,16 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     totalPriceSpan.textContent = total.toFixed(2);
   }
+
+  // Place Order Now
+  placeOrderButton.addEventListener('click', function() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || {};
+    if (Object.keys(cart).length === 0) {
+      alert('Your cart is empty. Please add some items before placing an order.');
+    } else {
+      alert('Your order has been placed successfully!');
+      localStorage.removeItem('cart'); // Clear the cart after placing the order
+      loadCart(); // Reload the cart view to show an empty cart
+    }
+  });
 });
