@@ -1,24 +1,25 @@
-<div class="text-end me-2 mt-3 mb-3">
-  <%=link_to "New Category", new_category_path, class:"btn btn-success"%>
-</div>
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">Name</th>
-      <th scope="col">Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @categories.each do |category| %>
-    <tr>
-      <td><%= category.name %></td>
-      <td><%= link_to "Edit Category", edit_item_path(category), class: "btn btn-warning" %>
-        <%= link_to "Delete Category", category_path(category), data: {
-            turbo_method: :delete,
-            turbo_confirm: "Are you sure?"
-          }, class:"btn btn-danger" %>
-      </td>
-    </tr>
-    <% end %>
-  </tbody>
-</table>
+<% if current_user.type == "Admin" %>
+  <div class="text-end me-2 mt-3 mb-3">
+    <%= link_to "New Category", new_category_path, class: "btn btn-success" %>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @categories.each do |category| %>
+        <tr>
+          <td><%= category.name %></td>
+          <td>
+            <%= link_to "Edit Category", edit_category_path(category), class: "btn btn-warning" %>
+            <%= link_to "Delete Category", category_path(category), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+<% end %>
