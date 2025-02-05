@@ -8,6 +8,7 @@
       <th scope="col">Image</th>
       <th scope="col">Name</th>
       <th scope="col">Price</th>
+      <th scope="col">Category</th> 
       <th scope="col">Action</th>
     </tr>
   </thead>
@@ -23,6 +24,7 @@
         </td>
         <td><%= item.name %></td>
         <td><%= item.price %></td>
+        <td><%= item.category&.name || "No Category" %></td>
         <td>
           <%= link_to "Edit Item", edit_item_path(item), class: "btn btn-warning" %>
           <%= link_to "Delete Item", item_path(item), data: {

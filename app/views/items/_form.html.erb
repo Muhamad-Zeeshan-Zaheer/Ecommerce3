@@ -19,6 +19,11 @@
           <%=form.number_field :price, class: "form-control" , placeholder: "Enter the price of item"%>
         </div>
 
+        <div class="mb-3">
+          <%= form.label :category_id, "Category", class: "form-label" %>
+          <%= form.collection_select :category_id, Category.all, :id, :name, { prompt: "Select a category" }, class: "form-control" %>
+        </div>
+
 
         <div class="mb-3">
 
