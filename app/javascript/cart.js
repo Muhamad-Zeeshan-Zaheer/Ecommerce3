@@ -5,6 +5,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
   loadCart();
 
+  // Initialize Stripe and Elements
+  const stripe = Stripe('pk_test_51QmV1oArpMqQUTXO035ta1UHmnKjRpWfkOYEdrExL7f1h1qx9KZa5mMaJ3pDIfmxYeDWzerZgtwVwOcXARnE8xek00tuGf6fpa');  // Replace with your actual publishable key
+  const elements = stripe.elements();
+  const cardElement = elements.create('card');
+  cardElement.mount('#card-element');  // Attach to the card-element div
+
   // Listen for clicks on 'Add to Cart' buttons directly
   document.querySelectorAll('.add-to-cart').forEach(button => {
     button.addEventListener('click', function(event) {
@@ -109,6 +115,57 @@ document.addEventListener("DOMContentLoaded", function() {
       total += parseFloat(itemTotal.textContent);
     });
     totalPriceSpan.textContent = total.toFixed(2);
+  }
+
+  // Handle Form Submission for Payment
+  const paymentForm = document.getElementById('payment-form');
+  paymentForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    stripe.createToken(cardElement).then(function(result) {
+      if (result.error) {
+        // Display error in payment form
+        const errorElement = document.getElementById('card-errors');
+        errorElement.textContent = result.error.message;
+      } else {
+        // Send the token to your server for processing
+        const token = result.token.id;
+        processPayment(token);
+      }
+    });
+  });
+
+  // Process Payment Token (Send to your backend)
+  function processPayment(token) {
+    const cart = JSON.parse(localStorage.getItem('cart')) || {};
+    const totalAmount = Object.values(cart).reduce((total, item) => total + item.price * item.quantity, 0);
+
+    // You can now send the token and amount to your server for payment processing
+    fetch('/process_payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token: token,
+        amount: totalAmount,
+        email: document.getElementById('email').value
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Payment Successful!');
+        localStorage.removeItem('cart'); // Clear the cart
+        loadCart(); // Reload the cart view to show an empty cart
+      } else {
+        alert('Payment failed! Please try again.');
+      }
+    })
+    .catch(error => {
+      console.error('Error processing payment:', error);
+      alert('An error occurred. Please try again later.');
+    });
   }
 
   // Place Order Now
