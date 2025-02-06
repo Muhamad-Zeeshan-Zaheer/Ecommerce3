@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const cart = JSON.parse(localStorage.getItem('cart')) || {};
     const totalAmount = Object.values(cart).reduce((total, item) => total + item.price * item.quantity, 0);
 
-    // You can now send the token and amount to your server for payment processing
+    // Send the token and amount to your server for payment processing
     fetch('/process_payment', {
       method: 'POST',
       headers: {
