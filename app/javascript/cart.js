@@ -158,9 +158,8 @@ document.addEventListener("DOMContentLoaded", function() {
         alert('Payment Successful!');
         localStorage.removeItem('cart'); // Clear the cart
         loadCart(); // Reload the cart view to show an empty cart
-      } else {
-        alert('Payment failed! Please try again.');
-      }
+      } 
+      
     })
     .catch(error => {
       console.error('Error processing payment:', error);

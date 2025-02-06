@@ -13,6 +13,7 @@ class ItemsController < ApplicationController
   def create
     @item=Item.new(item_params)
     if @item.save
+      flash[:notice] = "Item created successfully!"
       redirect_to items_path
     else
       render :new, status: :unprocessable_entity
